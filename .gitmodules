@@ -1,0 +1,3 @@
+[submodule "ext/cerveurus"]
+	path = ext/cerveurus
+	url = git@github.com:Kiyoshika/cerveurus.git
