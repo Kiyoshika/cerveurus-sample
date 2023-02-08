@@ -10,6 +10,8 @@ int main()
 	struct PersonRepository people;
 	person_init(&people, 1);
 
+	http_add_route_template(&http_server, "/", "index.html");
+
 	// add routes manage the "people" struct so we pass it by address and its deallocator
 	http_add_route_GET(&http_server, "/api/v1/person/getAll", &people, &person_free, &person_get_all);
 	http_add_route_POST(&http_server, "/api/v1/person/add", &people, &person_free, &person_add);

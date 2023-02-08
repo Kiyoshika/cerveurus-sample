@@ -7,3 +7,5 @@ add_subdirectory(ext/cerveurus)
 
 set(CMAKE_C_FLAGS "-O0 -g -Wall -fsanitize=address")
 add_subdirectory(src)
+
+file(COPY ${CerveurusSample_SOURCE_DIR}/templates DESTINATION ${CerveurusSample_SOURCE_DIR}/build/src)
