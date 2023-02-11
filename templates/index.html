@@ -17,6 +17,8 @@
 	<br>
 
 	<button onclick="addPerson(document.getElementById('first-name').value, document.getElementById('last-name').value, document.getElementById('age').value)">Add Person</button>
+	<button onclick="deletePerson(document.getElementById('first-name').value, document.getElementById('last-name').value, document.getElementById('age').value)">Delete Person</button>
+
 
 	<br>
 
@@ -26,6 +28,10 @@
 	</ul>
 
 	<script>
+		document.getElementById('first-name').value = '';
+		document.getElementById('last-name').value = '';
+		document.getElementById('age').value = '';
+
 		// on page load, fetch list of all people
 		fetch('http://localhost:7000/api/v1/person/getAll', {
 			method: 'GET'
@@ -49,25 +55,37 @@
 					};
 			console.log(JSON.stringify(request_body));
 
-			var success = true;
 			fetch('http://localhost:7000/api/v1/person/add', {
-			method: 'POST',
-			body: JSON.stringify(request_body) 
+				method: 'POST',
+				body: JSON.stringify(request_body) 
 			}).then(response => {
 				if (response.status != 200) {
 					// NOTE: this is basically the reponse the server sends but I can't figure out how to get it
 					// because I'm a dummy C programmer so I'm just hardcoding it now, fuck it
 					alert("That person already exists.");
-				}
-				else {
-					// instead of adding the person via JS, just reload the page to call GET request
+				} else {
 					location.reload();
 				}
 			});
 		}
 
-		function deletePerson(firstName, lastName) {
-			// TODO: implement this
+		function deletePerson(firstName, lastName, age) {
+			request_body = {
+						'firstName': firstName,
+						'lastName': lastName,
+						'age': parseInt(age)
+			};
+
+			fetch('http://localhost:7000/api/v1/person/delete', {
+				method: 'DELETE',
+				body: JSON.stringify(request_body)
+			}).then(response => {
+				if (response.status != 200) {
+					alert("That person doesn't exist.");
+				} else {
+					location.reload();
+				}
+			});
 		}
 	</script>
 </html>

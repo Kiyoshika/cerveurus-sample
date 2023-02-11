@@ -57,19 +57,21 @@ void person_get_all(
 	cJSON_Delete(body_json);
 }
 
-bool person_check_exists(
+ssize_t person_check_exists(
 		const struct PersonRepository* const repo,
 		const char* const firstName,
-		const char* const lastName)
+		const char* const lastName,
+		const uint8_t age)
 {
 	for (size_t i = 0; i < repo->n_people; ++i)
 	{
 		if (strcmp(firstName, repo->people[i].firstName) == 0
-			&& strcmp(lastName, repo->people[i].lastName) == 0)
-			return true;
+			&& strcmp(lastName, repo->people[i].lastName) == 0
+			&& age == repo->people[i].age)
+			return i;
 	}
 
-	return false;
+	return -1;
 }
 
 // accept json in below format and add it to repository
@@ -95,27 +97,22 @@ void person_add(
 		return;
 	}
 
-	// NOTE: it's possible to lose the pointer if n_people does not increment
-	// (e.g., due to trying to add a person that already exists)
-	cJSON* item = cJSON_GetObjectItemCaseSensitive(request_body_json, "firstName");
-	free(person->firstName);
-	person->firstName = strdup(item->valuestring);
-
-	item = cJSON_GetObjectItemCaseSensitive(request_body_json, "lastName");
-	free(person->lastName);
-	person->lastName = strdup(item->valuestring);
+	const char* const firstName = cJSON_GetObjectItemCaseSensitive(request_body_json, "firstName")->valuestring;
+	const char* const lastName = cJSON_GetObjectItemCaseSensitive(request_body_json, "lastName")->valuestring;
+	const uint8_t age = cJSON_GetObjectItemCaseSensitive(request_body_json, "age")->valueint;
 
 	// check if person exists before adding them
-	if (person_check_exists(repo, person->firstName, person->lastName))
+	if (person_check_exists(repo, firstName, lastName, age) != -1)
 	{
 		*(args->status_code) = BAD_REQUEST;
 		*(args->response_body) = strdup("That person already exists.\n");
 		cJSON_Delete(request_body_json);
 		return;
 	}
-
-	item = cJSON_GetObjectItemCaseSensitive(request_body_json, "age");
-	person->age = (uint8_t)item->valueint;
+	
+	person->firstName = strdup(firstName);
+	person->lastName = strdup(lastName);
+	person->age = age;
 
 	cJSON_Delete(request_body_json);
 
@@ -133,7 +130,45 @@ void person_add(
 void person_delete(
 		struct CallbackArgs* const args)
 {
+	struct PersonRepository* repo = args->user_data;
 
+	// parse JSON request body and assign values to struct
+	cJSON* request_body_json = cJSON_Parse(args->request_body);
+	if (!request_body_json)
+	{
+		*(args->status_code) = BAD_REQUEST;
+		*(args->response_body) = strdup("There was a problem parsing the JSON request.\n");
+		return;
+	}
+
+	const char* const firstName = cJSON_GetObjectItemCaseSensitive(request_body_json, "firstName")->valuestring;
+	const char* const lastName = cJSON_GetObjectItemCaseSensitive(request_body_json, "lastName")->valuestring;
+	const uint8_t age = cJSON_GetObjectItemCaseSensitive(request_body_json, "age")->valueint;
+
+	ssize_t person_idx = person_check_exists(repo, firstName, lastName, age);
+	if (person_idx == -1)
+	{
+		*(args->status_code) = NOT_FOUND;
+		*(args->response_body) = strdup("That person doesn't exist.");
+		cJSON_Delete(request_body_json);
+		return;
+	}
+
+	if (repo->n_people == 0)
+		return;
+
+	free(repo->people[person_idx].firstName);
+	repo->people[person_idx].firstName = NULL;
+
+	free(repo->people[person_idx].lastName);
+	repo->people[person_idx].lastName = NULL;
+
+	for (size_t i = person_idx; i < repo->n_people - 1; ++i)
+		memcpy(&repo->people[i], &repo->people[i+1], sizeof(struct Person));
+	
+	repo->n_people--;
+
+	cJSON_Delete(request_body_json);
 }
 
 void person_free(
