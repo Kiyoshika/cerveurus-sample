@@ -3,7 +3,7 @@ This is a sample project using my [Cerveurus](https://github.com/Kiyoshika/cerve
 
 This is a simple API that maintains a list of people (first name, last name and age) which you can add, delete and fetch the list.
 
-I've created a Makefile that shows an example of adding a person and fetching the list (`make add` and `make get`).
+I wrote a very simple UI to interact with the API. Just go to `http://localhost:7000` after running the server.
 
 # Endpoints
 
