@@ -10,7 +10,7 @@ I've created a Makefile that shows an example of adding a person and fetching th
 ## Add Person
 * URI: `/api/v1/person/add`
 * REQUEST BODY:
-```text
+```json
 {
 	"firstName": "...",
 	"lastName": "...",
@@ -24,7 +24,7 @@ I've created a Makefile that shows an example of adding a person and fetching th
 ## Get List of People
 * URI: `/api/v1/person/getAll`
 * RESPONSE BODY:
-```text
+```json
 {
 	"people": [
 		{
@@ -43,3 +43,16 @@ I've created a Makefile that shows an example of adding a person and fetching th
 }
 ```
 * Returns status `200 OK`
+
+## Delete Person
+* URI: `/api/v1/person/delete`
+* REQUEST BODY:
+```json
+{
+	"firstName": "...",
+	"lastName": "...",
+	"age": 40
+}
+```
+* If person doesn't exist, returns `404 NOT FOUND`
+* Otherwise, returns `200 OK`
