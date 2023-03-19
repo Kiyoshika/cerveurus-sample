@@ -5,6 +5,8 @@ This is a simple API that maintains a list of people (first name, last name and 
 
 I wrote a very simple UI to interact with the API. Just go to `http://localhost:7000` after running the server.
 
+**NOTE:** It seems you must be INSIDE the `build/src` folder and run `./myserver` for it to load the templates properly. Otherwise a blank page loads (can't render anything).
+
 # Endpoints
 
 ## Add Person
